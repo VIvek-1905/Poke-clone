@@ -1,0 +1,8 @@
+{
+  "name": "poke-clone",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

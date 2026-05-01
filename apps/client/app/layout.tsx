@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Poke-clone",
-  description: "Advanced Battle Simulator",
+  description: "Advanced Battle Network Client",
 };
 
 export default function RootLayout({
@@ -15,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-neutral-950 text-slate-50">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en">
+      <body className={`${inter.className} antialiased min-h-screen text-slate-900 bg-slate-100`}>
         {children}
       </body>
     </html>

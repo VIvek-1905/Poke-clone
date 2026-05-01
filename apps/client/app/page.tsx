@@ -1,131 +1,188 @@
-export default function BattleArena() {
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+
+const PRESETS = {
+  nature: {
+    name: "Nature Stadium",
+    bg: "url('/backgrounds/nature.jpg')",
+    text: "text-emerald-950",
+    cardBg: "bg-white/90"
+  },
+  cyber: {
+    name: "Neon Cyber",
+    bg: "url('/backgrounds/cyber.jpg')",
+    text: "text-indigo-950",
+    cardBg: "bg-white/85"
+  },
+  sunset: {
+    name: "Sunset Coast",
+    bg: "url('/backgrounds/sunset.jpg')",
+    text: "text-orange-950",
+    cardBg: "bg-white/85"
+  }
+};
+
+export default function HomePortal() {
+  const [theme, setTheme] = useState<string>("nature");
+  const [customBg, setCustomBg] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("app-theme");
+    const savedCustom = localStorage.getItem("custom-bg");
+    if (savedTheme && PRESETS[savedTheme as keyof typeof PRESETS]) {
+      setTheme(savedTheme);
+    }
+    if (savedCustom) {
+      setCustomBg(savedCustom);
+    }
+  }, []);
+
+  const changeTheme = (themeKey: string) => {
+    setTheme(themeKey);
+    setCustomBg(null);
+    localStorage.setItem("app-theme", themeKey);
+    localStorage.removeItem("custom-bg");
+  };
+
+  const handleCustomBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setCustomBg(base64String);
+        localStorage.setItem("custom-bg", base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const backgroundStyle = customBg 
+    ? { backgroundImage: `url(${customBg})`, backgroundSize: "cover", backgroundPosition: "center" }
+    : { backgroundImage: PRESETS[theme as keyof typeof PRESETS]?.bg || "none", backgroundSize: "cover", backgroundPosition: "center" };
+
+  const activePreset = PRESETS[theme as keyof typeof PRESETS] || PRESETS.nature;
+
   return (
-    <main className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 select-none selection:bg-cyan-500/30">
-      {/* Game Header */}
-      <div className="w-full max-w-5xl mb-4 flex justify-between items-center px-2">
-        <h1 className="text-2xl font-black tracking-widest bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent uppercase">
-          Poke-clone <span className="text-xs font-light text-neutral-500 normal-case tracking-normal">Gen 9 Engine</span>
-        </h1>
-        <div className="flex items-center gap-4 text-sm font-semibold text-neutral-400">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Server Connected
-          </span>
+    <main 
+      className="min-h-screen flex flex-col items-center justify-center p-6 select-none font-sans transition-all duration-300 relative"
+      style={backgroundStyle}
+    >
+      {/* Background overlay for scannability */}
+      <div className="absolute inset-0 bg-slate-900/15 backdrop-blur-[1px] pointer-events-none"></div>
+
+      {/* Header Panel */}
+      <div className={`w-full max-w-5xl mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2 z-10 ${activePreset.text}`}>
+        <div>
+          <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 bg-clip-text text-transparent uppercase flex items-center gap-3">
+            Poke-clone <span className="text-xs font-bold px-2.5 py-1 bg-white/70 backdrop-blur-sm border border-slate-200/80 rounded-sm tracking-normal normal-case shadow-sm">v1.0-alpha</span>
+          </h1>
+          <p className="font-semibold text-xs mt-1 tracking-wider uppercase opacity-75">Competitive Battle Client</p>
+        </div>
+
+        {/* Customization controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-white/80 backdrop-blur-sm border border-slate-200/60 p-2.5 rounded shadow-sm w-full md:w-auto">
+          <div className="flex items-center gap-1.5 w-full justify-between sm:justify-start">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 mr-1">Client Theme:</span>
+            {Object.keys(PRESETS).map((p) => (
+              <button 
+                key={p} 
+                onClick={() => changeTheme(p)}
+                className={`text-[10px] px-2.5 py-1.5 rounded-sm font-bold uppercase tracking-wider border transition-all ${
+                  theme === p && !customBg 
+                  ? "bg-indigo-700 text-white border-indigo-600 shadow-sm" 
+                  : "bg-white/60 text-slate-700 hover:bg-white border-slate-200"
+                }`}
+              >
+                {PRESETS[p as keyof typeof PRESETS].name.split(" ")[0]}
+              </button>
+            ))}
+          </div>
+
+          <div className="h-px sm:h-5 w-full sm:w-px bg-slate-200"></div>
+
+          <label className="text-[10px] font-bold bg-white/60 hover:bg-white text-slate-700 px-3 py-1.5 rounded-sm border border-slate-200 cursor-pointer uppercase tracking-wider transition-all hover:shadow-sm w-full sm:w-auto text-center">
+            Upload Wallpaper
+            <input type="file" accept="image/*" onChange={handleCustomBgUpload} className="hidden" />
+          </label>
         </div>
       </div>
 
-      {/* Main High-End Visual Arena Container */}
-      <div className="w-full max-w-5xl bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6)] flex flex-col h-[640px]">
+      {/* Primary Grid Layout */}
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 z-10">
         
-        {/* --- BATTLE FIELD (Top 65%) --- */}
-        <div className="flex-1 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-neutral-800/40 via-neutral-900 to-neutral-950 relative p-8 flex flex-col justify-between overflow-hidden border-b border-neutral-800/80">
-          
-          {/* Subtle Grid overlay for that futuristic look */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none"></div>
-
-          {/* Top Row: Enemy HUD & Player Status Summary */}
-          <div className="flex justify-between items-start z-10">
-            {/* Enemy Status Panel */}
-            <div className="bg-neutral-900/80 backdrop-blur-md border border-neutral-800 p-4 rounded-xl w-80 shadow-2xl">
-              <div className="flex justify-between items-baseline mb-2">
-                <span className="text-neutral-400 text-xs font-bold tracking-widest uppercase">Opponent</span>
-                <span className="text-cyan-400 text-xs font-black tracking-wider uppercase bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Water</span>
-              </div>
-              <div className="flex justify-between font-extrabold text-lg mb-1 tracking-wide items-baseline">
-                <h2 className="uppercase text-white">Blastoise</h2>
-                <span className="text-neutral-500 text-sm">Lv. 50</span>
-              </div>
-              {/* Modern Neon Health Bar */}
-              <div className="w-full bg-neutral-800 h-2.5 rounded-full overflow-hidden border border-neutral-700/50 flex items-center p-[2px]">
-                <div className="bg-gradient-to-r from-emerald-500 to-green-400 w-[100%] h-full rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-              </div>
-              <div className="flex justify-between items-center mt-1.5 text-xs font-bold text-neutral-400">
-                <span className="text-green-400 font-extrabold uppercase">Normal</span>
-                <span>100%</span>
-              </div>
+        {/* Card 1: Matchmaking */}
+        <div className={`${activePreset.cardBg} backdrop-blur-sm border border-slate-200/60 p-6 rounded flex flex-col justify-between h-64 transition-all hover:shadow-md group relative overflow-hidden`}>
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] font-bold tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 uppercase">Ranked Matchmaking</span>
+              <span className="text-slate-400 font-mono text-[10px] font-bold tracking-wider">STATUS: ONLINE</span>
             </div>
-
-            {/* Empty space/Visual balance or extra battle info */}
-            <div className="text-xs text-neutral-600 font-mono tracking-wider">TURN 1</div>
+            <h2 className="text-xl font-black text-slate-800 uppercase tracking-wide group-hover:text-indigo-700 transition-colors">Battle Arena</h2>
+            <p className="text-slate-600 text-xs mt-2 leading-relaxed font-medium">
+              Join immediate matches across standard competitive regulation formats utilizing randomized or custom battle squads.
+            </p>
           </div>
-
-          {/* Bottom Row: Player HUD & Action Visuals */}
-          <div className="flex justify-between items-end z-10">
-            {/* Player Sprite Position Placeholder */}
-            <div className="relative flex justify-center items-center w-64 h-48 border-2 border-dashed border-neutral-800 rounded-2xl bg-neutral-950/40 hover:border-neutral-700 transition-all group duration-300">
-              <span className="text-xs font-bold text-neutral-600 group-hover:text-neutral-400 tracking-widest uppercase transition-colors">Player Sprite</span>
-            </div>
-
-            {/* Player Status Panel */}
-            <div className="bg-neutral-900/80 backdrop-blur-md border border-neutral-800 p-4 rounded-xl w-80 shadow-2xl">
-              <div className="flex justify-between items-baseline mb-2">
-                <span className="text-neutral-400 text-xs font-bold tracking-widest uppercase">Player</span>
-                <span className="text-orange-400 text-xs font-black tracking-wider uppercase bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20">Fire</span>
-              </div>
-              <div className="flex justify-between font-extrabold text-lg mb-1 tracking-wide items-baseline">
-                <h2 className="uppercase text-white">Charizard</h2>
-                <span className="text-neutral-500 text-sm">Lv. 50</span>
-              </div>
-              {/* HP Bar */}
-              <div className="w-full bg-neutral-800 h-2.5 rounded-full overflow-hidden border border-neutral-700/50 flex items-center p-[2px]">
-                <div className="bg-gradient-to-r from-emerald-500 to-green-400 w-[100%] h-full rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-              </div>
-              <div className="flex justify-between items-center mt-1 text-xs font-bold text-neutral-400">
-                <span className="text-green-400 font-extrabold uppercase">Healthy</span>
-                <span className="text-white tracking-wider">153 / 153</span>
-              </div>
-            </div>
-          </div>
-
+          <Link href="/battle" className="mt-4 bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 rounded-sm text-center transition-all uppercase tracking-wider text-xs shadow-sm">
+            Find Match
+          </Link>
         </div>
 
-        {/* --- CONTROLS / INTERACTION PANEL (Bottom 35%) --- */}
-        <div className="h-[224px] bg-neutral-900/50 backdrop-blur-xl p-4 flex gap-4 border-t border-neutral-800/60">
-          
-          {/* Action Readout Message Box */}
-          <div className="flex-1 bg-neutral-950/60 rounded-xl border border-neutral-800 p-4 flex flex-col justify-between shadow-inner">
-            <div className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Action Status</div>
-            <p className="text-neutral-200 text-xl font-medium leading-relaxed tracking-wide">
-              What will <span className="text-orange-400 font-extrabold uppercase">Charizard</span> do?
-            </p>
-            <div className="flex gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-orange-500/80 shadow-[0_0_8px_rgba(249,115,22,0.4)]"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-neutral-800"></span>
+        {/* Card 2: Teambuilder */}
+        <div className={`${activePreset.cardBg} backdrop-blur-sm border border-slate-200/60 p-6 rounded flex flex-col justify-between h-64 transition-all hover:shadow-md group relative overflow-hidden`}>
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] font-bold tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 uppercase">Strategy Configuration</span>
+              <span className="text-slate-400 font-mono text-[10px] font-bold tracking-wider">SHARED INSTANCE</span>
             </div>
+            <h2 className="text-xl font-black text-slate-800 uppercase tracking-wide group-hover:text-blue-700 transition-colors">Team Builder</h2>
+            <p className="text-slate-600 text-xs mt-2 leading-relaxed font-medium">
+              Construct and modify battle-ready squads. Select custom abilities, items, EVs/IVs, movesets, and Tera classifications.
+            </p>
           </div>
+          <Link href="/teambuilder" className="mt-4 bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 rounded-sm text-center transition-all uppercase tracking-wider text-xs shadow-sm">
+            Construct Squad
+          </Link>
+        </div>
 
-          {/* Clean Modern Move Grid */}
-          <div className="w-[50%] grid grid-cols-2 gap-3">
-            <button className="relative bg-gradient-to-br from-neutral-800/80 to-neutral-900 border border-orange-500/30 hover:border-orange-400 rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-neutral-800 flex flex-col justify-between shadow-lg group overflow-hidden active:scale-[0.98]">
-              <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span className="text-xs font-black text-orange-400 tracking-widest uppercase">Fire</span>
-              <span className="text-lg font-bold text-white tracking-wide">Flamethrower</span>
-              <span className="text-xs font-medium text-neutral-500 mt-1 uppercase">100% Acc • 90 Pwr</span>
-            </button>
-
-            <button className="relative bg-gradient-to-br from-neutral-800/80 to-neutral-900 border border-orange-500/30 hover:border-orange-400 rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-neutral-800 flex flex-col justify-between shadow-lg group overflow-hidden active:scale-[0.98]">
-              <div className="absolute inset-0 bg-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span className="text-xs font-black text-orange-400 tracking-widest uppercase">Fire</span>
-              <span className="text-lg font-bold text-white tracking-wide">Fire Blast</span>
-              <span className="text-xs font-medium text-neutral-500 mt-1 uppercase">85% Acc • 110 Pwr</span>
-            </button>
-
-            <button className="relative bg-gradient-to-br from-neutral-800/80 to-neutral-900 border border-neutral-700/80 hover:border-neutral-500 rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-neutral-800 flex flex-col justify-between shadow-lg group overflow-hidden active:scale-[0.98]">
-              <span className="text-xs font-black text-neutral-400 tracking-widest uppercase">Normal</span>
-              <span className="text-lg font-bold text-white tracking-wide">Slash</span>
-              <span className="text-xs font-medium text-neutral-500 mt-1 uppercase">100% Acc • 70 Pwr</span>
-            </button>
-
-            <button className="relative bg-gradient-to-br from-neutral-800/80 to-neutral-900 border border-yellow-500/30 hover:border-yellow-400 rounded-xl px-4 py-3 text-left transition-all duration-200 hover:bg-neutral-800 flex flex-col justify-between shadow-lg group overflow-hidden active:scale-[0.98]">
-              <div className="absolute inset-0 bg-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span className="text-xs font-black text-yellow-400 tracking-widest uppercase">Electric</span>
-              <span className="text-lg font-bold text-white tracking-wide">Thunder Punch</span>
-              <span className="text-xs font-medium text-neutral-500 mt-1 uppercase">100% Acc • 75 Pwr</span>
-            </button>
+        {/* Card 3: Chat Room */}
+        <div className={`${activePreset.cardBg} backdrop-blur-sm border border-slate-200/60 p-6 rounded flex flex-col justify-between h-64 transition-all hover:shadow-md group relative overflow-hidden`}>
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[10px] font-bold tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-100 uppercase">Social Relay</span>
+              <span className="text-slate-400 font-mono text-[10px] font-bold tracking-wider">PUBLIC LOBBY</span>
+            </div>
+            <h2 className="text-xl font-black text-slate-800 uppercase tracking-wide group-hover:text-purple-700 transition-colors">Chat Room</h2>
+            <p className="text-slate-600 text-xs mt-2 leading-relaxed font-medium">
+              Collaborate and network directly with other trainers within the centralized public lobby.
+            </p>
           </div>
-
+          <Link href="/chat" className="mt-4 bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 rounded-sm text-center transition-all uppercase tracking-wider text-xs shadow-sm">
+            Join Channels
+          </Link>
         </div>
 
       </div>
+
+      {/* Bottom Campaign / Offline Integration */}
+      <div className={`w-full max-w-5xl ${activePreset.cardBg} backdrop-blur-sm border border-slate-200/60 p-5 rounded flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-md transition-all z-10`}>
+        <div className="flex items-center gap-4">
+          <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded font-mono font-bold text-xs hidden sm:block tracking-wider uppercase">
+            SOLO
+          </div>
+          <div>
+            <span className="text-[10px] font-bold tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase border border-emerald-100">Local Testing Environment</span>
+            <h3 className="text-lg font-black text-slate-800 mt-1 uppercase tracking-wider">Story Campaign Engine</h3>
+            <p className="text-slate-600 text-xs mt-0.5 font-medium">Execute single player battle scenarios without network dependency.</p>
+          </div>
+        </div>
+        <button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3.5 rounded-sm uppercase tracking-wider text-xs transition-all whitespace-nowrap shadow-sm">
+          Awaiting Release
+        </button>
+      </div>
+
     </main>
   );
 }

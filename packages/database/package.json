@@ -1,0 +1,14 @@
+{
+  "name": "@poke-clone/db",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.ts",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "dotenv": "^17.4.2",
+    "prisma": "^6.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.39"
+  }
+}

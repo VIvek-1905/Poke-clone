@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- GAME DATABASE SCHEMAS ---
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // In a real app, this will be hashed!
+  
+  // Competitive Stats
+  eloRating Int      @default(1000)
+  rank      Int?     // Nullable because not everyone is top 1000
+  wins      Int      @default(0)
+  losses    Int      @default(0)
+
+  // System
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

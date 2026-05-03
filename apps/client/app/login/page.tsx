@@ -20,7 +20,6 @@ export default function Login() {
     const response = await authenticateTrainer(username, password);
 
     if (response.success) {
-      // Instantly redirect to the main portal upon success
       router.push("/");
     } else {
       setErrorMsg(response.error || "Authentication failed.");

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { logoutTrainer } from "./login/actions";
 
 const PRESETS = {
   nature: {
@@ -27,6 +29,8 @@ const PRESETS = {
 export default function HomePortal() {
   const [theme, setTheme] = useState<string>("nature");
   const [customBg, setCustomBg] = useState<string | null>(null);
+  
+  const router = useRouter();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("app-theme");
@@ -70,16 +74,26 @@ export default function HomePortal() {
       className="min-h-screen flex flex-col items-center justify-center p-6 select-none font-sans transition-all duration-300 relative"
       style={backgroundStyle}
     >
-      {/* Background overlay for scannability */}
       <div className="absolute inset-0 bg-slate-900/15 backdrop-blur-[1px] pointer-events-none"></div>
 
       {/* Header Panel */}
       <div className={`w-full max-w-5xl mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2 z-10 ${activePreset.text}`}>
         <div>
           <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 bg-clip-text text-transparent uppercase flex items-center gap-3">
-            Poke-clone <span className="text-xs font-bold px-2.5 py-1 bg-white/70 backdrop-blur-sm border border-slate-200/80 rounded-sm tracking-normal normal-case shadow-sm">v1.0-alpha</span>
+            Poke-clone <span className="text-xs font-bold px-2.5 py-1 bg-white/70 backdrop-blur-sm border border-slate-200/80 rounded-sm tracking-normal normal-case shadow-sm text-slate-800">v1.0-alpha</span>
           </h1>
-          <p className="font-semibold text-xs mt-1 tracking-wider uppercase opacity-75">Competitive Battle Client</p>
+          <p className="font-semibold text-xs mt-1 mb-4 tracking-wider uppercase opacity-75">Competitive Battle Client</p>
+          
+          {/* LOGOUT BUTTON */}
+          <button 
+            onClick={async () => {
+              await logoutTrainer();
+              router.push("/login");
+            }}
+            className="inline-flex items-center justify-center bg-slate-200 hover:bg-red-50 hover:text-red-700 text-slate-700 text-[10px] font-bold px-4 py-2 rounded-sm uppercase tracking-widest transition-all shadow-sm border border-slate-300"
+          >
+            Disconnect Session ⏏
+          </button>
         </div>
 
         {/* Customization controls */}
@@ -165,24 +179,6 @@ export default function HomePortal() {
         </div>
 
       </div>
-
-      {/* Bottom Campaign / Offline Integration */}
-      <div className={`w-full max-w-5xl ${activePreset.cardBg} backdrop-blur-sm border border-slate-200/60 p-5 rounded flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-md transition-all z-10`}>
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded font-mono font-bold text-xs hidden sm:block tracking-wider uppercase">
-            SOLO
-          </div>
-          <div>
-            <span className="text-[10px] font-bold tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase border border-emerald-100">Local Testing Environment</span>
-            <h3 className="text-lg font-black text-slate-800 mt-1 uppercase tracking-wider">Story Campaign Engine</h3>
-            <p className="text-slate-600 text-xs mt-0.5 font-medium">Execute single player battle scenarios without network dependency.</p>
-          </div>
-        </div>
-        <button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3.5 rounded-sm uppercase tracking-wider text-xs transition-all whitespace-nowrap shadow-sm">
-          Awaiting Release
-        </button>
-      </div>
-
     </main>
   );
 }

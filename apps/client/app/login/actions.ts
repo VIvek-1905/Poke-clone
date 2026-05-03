@@ -35,4 +35,9 @@ export async function authenticateTrainer(username: string, securityKey: string)
     console.error("Database Error:", error);
     return { success: false, error: "Internal server error." };
   }
+} 
+
+
+export async function logoutTrainer() {
+  (await cookies()).delete("trainer-session");
 }

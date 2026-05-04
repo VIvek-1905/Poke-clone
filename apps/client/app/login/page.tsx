@@ -27,6 +27,10 @@ export default function Login() {
     }
   };
 
+  const handleSocialMock = (provider: string) => {
+    alert(`${provider} OAuth requires external API keys to be generated first. This module is pending activation!`);
+  };
+
   return (
     <main className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-6 select-none font-sans text-slate-900">
       <div className="w-full max-w-md bg-white border border-slate-200 p-6 rounded shadow-sm">
@@ -77,6 +81,35 @@ export default function Login() {
             {isLoading ? "Authenticating..." : "Initialize Connection"}
           </button>
         </form>
+
+        {/* SOCIAL LOGIN SECTION */}
+        <div className="mt-6 border-t border-slate-100 pt-6">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-wider">
+              <span className="bg-white px-3 text-slate-400">Or Authenticate With</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button 
+              type="button"
+              onClick={() => handleSocialMock("Google")}
+              className="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-bold py-2.5 rounded-sm uppercase tracking-wider text-[10px] shadow-sm transition-all"
+            >
+              Google
+            </button>
+            <button 
+              type="button"
+              onClick={() => handleSocialMock("Discord")}
+              className="w-full flex items-center justify-center gap-2 bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-2.5 rounded-sm uppercase tracking-wider text-[10px] shadow-sm transition-all"
+            >
+              Discord
+            </button>
+          </div>
+        </div>
 
       </div>
     </main>
